@@ -1,0 +1,7 @@
+#!/bin/sh
+
+javac -h . HelloJNI.java
+gcc -c -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux HelloJNI.c -o HelloJNI.o
+gcc --shared -fPIC -o libnative.so HelloJNI.o -lc
+java -Djava.library.path=. HelloJNI
+
