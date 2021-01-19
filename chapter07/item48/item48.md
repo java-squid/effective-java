@@ -111,3 +111,52 @@ parallel()을 추가하면 병렬화 덕분에 더 빨라졌다. 만약 n이 크
 무작위 수들로 이뤄진 스트림을 병렬화하려거든 ThreadLocalRandom 보다는 SplittableRandom 인스턴스를 이용하자. 병렬화할 시 성능이 선형으로 증가한다. ThreadLocalRandom은 단일 스레드에서 쓰고자 만든것. 병렬 스트림용으로는 사용할 수 있지만 SplittableRandom보다는 느릴 것이다.
 
 Random은 모든 연산을 동기화하기 때문에 병렬 처리하면 최악의 성능을 보일 것이다.
+
+
+
+
+
+## 이슈 정리 및 Q&A
+
+### 담당자 의견
+
+[https://www.popit.kr/java8-stream%EC%9D%98-parallel-%EC%B2%98%EB%A6%AC/](https://www.popit.kr/java8-stream의-parallel-처리/)
+
+### Stream parallel을 실제 환경에서는?
+
+Stream의 parallel에 대해 여러가지 논쟁과 토론이 많다. 주로 내용들은 Deadlock 상황이나 Thread가 의도하지 않게 많이 만들어 질 수 있다라는 내용이다. 주로 원인은 ForkJoinPool을 사용하면서 발생하는 문제이다. 여러 블로그나 문서를 참조하면 다음과 같은 parallel 사용 시 주의 사항이 많이 언급되고 있다.
+
+- parallel stream 내부에서 다시 parallel stream 사용할 경우 synchronized 키워드는 deadlock 을 발생시킬 수 있다.
+- 특정 Container 내부에서 사용하는 경우에는 parallel은 신중하게 사용해야 하며, Container가 default pool을 어떻게 처리하는지 정확하게 모르는 경우에는 Default pool은 절대 사용하지 마라.
+- Java EE Container에서는 Stream의 parallel을 사용하지 마라.
+
+### 아직 많은 내용을 살펴 보지는 못했지만 현재까지 살펴본 내용으로 판단해보면 필자의 의견은 다음과 같다.
+
+- 간단하게 독립된 프로그램으로 아주 큰 파일 또는 데이터를 가공하는 작업을 할때는 parallel을 이용하는 것도 쉽게 개발할 수 있는 하나의 방법이라고 생각한다.
+- 하지만 데몬 프로그램이나 WAS에서 동작하는 기능 등에서는 권장하지 않는다.
+
+
+
+아이템48과 다른 도서 [Practical 모던 자바](http://www.yes24.com/Product/Goods/92529658?OzSrank=1)을 참고하면서 느낀점은 기존의 Concurrent API, 포크/조인 프레임워크를 이해하고 제대로 활용한 다음에 스트림 병렬화를 시도해야할 듯 합니다.
+
+
+
+### Q1.
+
+> 데이터 소스가 Stream.iterate거나 중간 연산으로 limit를 쓰면 파이프라인 병렬화로는 성능 개선을 기대할 수 없다. 파이프라인 병렬화는 limit를 다룰 때 CPU 코어가 남는다면 원소를 몇 개 더 처리한 후 제한된 개수 이후의 결과를 버려도 아무런 해가 없다고 가정한다.
+
+본문 내용 중 궁금한 것이 있어서 질문남깁니다. limit 을 쓰면 왜 병렬화로는 성능 개선을 기대할 수 없는 것인가요?
+
+
+
+### A1.
+
+limit()는 요소의 순서에 의존하는 연산이라 성능이 더욱 떨어진다고 합니다.
+오라클 공식문서에 따르면 [stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
+
+> For parallel streams, relaxing the ordering constraint can sometimes enable more efficient execution. Certain aggregate operations, such as filtering duplicates (distinct()) or grouped reductions (Collectors.groupingBy()) can be implemented more efficiently if ordering of elements is not relevant. Similarly, operations that are intrinsically tied to encounter order, such as limit(), may require buffering to ensure proper ordering, undermining the benefit of parallelism. In cases where the stream has an encounter order, but the user does not particularly care about that encounter order, explicitly de-ordering the stream with unordered() may improve parallel performance for some stateful or terminal operations. However, most stream pipelines, such as the "sum of weight of blocks" example above, still parallelize efficiently even under ordering constraints.
+
+번역:
+병렬 스트림의 경우 **순서 제한을 완화하면** 때때로 더 효율적인 실행이 가능할 수 있습니다. 중복 필터링 (distinct()) 또는 그룹화 된 축소 (Collectors.groupingBy())와 같은 특정 집계 작업은 요소 순서가 적절하지 않은 경우보다 효율적으로 구현할 수 있습니다. 마찬가지로 limit ()와 같이 발생 순서에 본질적으로 연결된 작업은 적절한 순서를 보장하기 위해 버퍼링이 필요할 수 있으며, 이는 병렬 처리의 이점을 약화시킵니다. 스트림에 발생 순서가 있지만 사용자가 그 발생 순서에 대해 특별히 신경 쓰지 않는 경우, unordered()를 사용하여 스트림의 순서를 명시적으로 취소하면 일부 상태 저장 또는 터미널 작업에 대한 병렬 성능이 향상 될 수 있습니다. 그러나 위의 "블록 가중치 합계"예제와 같은 대부분의 스트림 파이프 라인은 순서 제약 조건에서도 여전히 효율적으로 병렬화됩니다.
+
+unordered()나 findAny()를 먼저 호출하고, limit()을 호출하는 법이 더욱 빨라질 가능성이 있습니다.
