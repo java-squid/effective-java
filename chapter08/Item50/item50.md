@@ -196,3 +196,24 @@ public class Item50 {
 Date 의 경우 요즈음에는 LocalDate 를 통해 안전하게 방어해낼 수 있다고 한다. 클래스를 보니 setter 는 존재하지 않는다. <br>
 문득 든 생각인데 이런 구조로 불가피하게 짜야한다면 어쩔 수 없지만, 애초에 Setter 를 제한적으로 제공하거나, 필요하지않다면 없애는 것이 좋다고 생각이든다 <br>
 무분별한 Setter 의 남발이 안좋다고 말하는 이유 중 한가지가 아닐까? 라는 생각이 든다. <br>
+
+## 정
+일단 공격적이라는 것보다는 이렇게 Side-Effect 가 일어날 수 있다에 중점을 두는것이 옳다고 생각했고,
+위에서 적은 내용외에 추가하자면, 함수형 프로그래밍에서 Side-Effect가 일어날 수 있는 부작용 예시를 하나더 추가했다.
+아래예시가 참조로 일어나는 부작용을 막기위해 가변변수를 활용한 것이다.
+
+
+```java
+
+static BiFunction<Integer, Set<Integer>, Set<Integer>> factors = (number, originalSet) -> {
+      HashSet<Integer> factors = Set.copyOf(originalSet); // 기존 HashSet 을 받아서 복사하여 사용
+        IntStream range = IntStream.rangeClosed(1, (int) Math.sqrt(number));
+        range.forEach(ele -> {if(isFactor.apply(number, ele)){factors.add(ele); factors.add(number / ele);}});
+      return factors;
+    };
+```
+
+## Q&A
+
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/question.png)
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/answer.png)
