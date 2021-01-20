@@ -1,5 +1,46 @@
 # 아이템46. 스트림에서는 부작용 없는 함수를 사용하라
 
+## 파이로가 오해한 점 정리
+
+### telescoping
+
+- 헤드폰 밴드가 사람 머리 사이즈에 맞춰서 늘렸다 줄였다 할 수 있는 움직임을 telescoping이라고 표현
+- **telescoping argument list 패턴**: 매개변수가 더 많은 overloaded 함수를 정의할 때 매개변수의 순서를 바꾸지 않는 것
+
+### Call by Reference
+
+#### Reference vs Address
+
+- **address**: value that corresponds to a place in memory
+- **reference**: name that refers to an existing object, rather than being it's own object.
+
+자바는 기본적으로 **pass by value** 만을 언어적으로 허용한다. <br>
+따라서 자바에서 address value 를 pass 해서 참조할 수는 있어도, <br>
+reference 라는 개념은 자바에서 허용되지 않는다.
+
+#### Reference 의 예시
+
+아래의 c++ 코드에서 `&a` 와 `&b` 가 바로 reference 이다. <br>
+자바에서는 value 에 대한 직접적인 reference 를 언어적으로 지원하지 않는다. <br>
+기껏해야 value 를 객체로 감싸서, 객체의 address를 통해 객체 내부의 값을 변경할 수 있을 뿐이다.
+
+```cpp
+void switch_by_ref(int &a, int &b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+int main() {
+    int a = 10;
+    int b = 20;
+    switch_by_ref(a, b); // a, b 의 값이 서로 바뀌어 있다.
+    cout << "a : " << a << endl;
+    cout << "b : " << b << endl;
+    return 0;
+}
+```
+
 ## 질의응답
 
 ### 질문1.
