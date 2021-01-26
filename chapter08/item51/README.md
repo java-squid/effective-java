@@ -117,3 +117,9 @@ Thermometer.newInstance(TemperatureScale.FAHRENHEIT);
 ```
 
 저게더 보기 좋을때는 저렇게 사용하라는 뜻이다. 근데 true 를 받아줘야 작동되는 로직에는 true 를 쓰는게 좋다
+
+## Q&A
+
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0125-1.png)
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0125-2.png)
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0125-3.png)
