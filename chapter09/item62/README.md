@@ -89,3 +89,55 @@ class Test{
 ```
 
 뭐 위와 같은 방식으로 이용할 수 있을 것 같다. 
+
+## ThreadLocal
+
+- 변수의 영역은 특정 Scope 에서만 유효하다. 라는 아이디어에서 착안하여 Thread 영역에도 변수를 설정해보자 라는 개념으로 착안된듯함.
+Thread 들이 자원을 공유하는게 아니라, Thread 내에 고유한 지역변수를 만들어주는것임.
+  
+```java
+public class ThreadLocalExample {
+
+
+    public static class MyRunnable implements Runnable {
+
+        private ThreadLocal<Integer> threadLocal =
+               new ThreadLocal<Integer>();
+
+        @Override
+        public void run() {
+            threadLocal.set( (int) (Math.random() * 100D) );
+    
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+            }
+    
+            System.out.println(threadLocal.get());
+        }
+    }
+
+
+    public static void main(String[] args) {
+        MyRunnable sharedRunnableInstance = new MyRunnable();
+
+        Thread thread1 = new Thread(sharedRunnableInstance);
+        Thread thread2 = new Thread(sharedRunnableInstance);
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join(); //wait for thread 1 to terminate
+        thread2.join(); //wait for thread 2 to terminate
+    }
+
+}
+```
+
+원래의 경우 한 객체를 두 스레드가 돌려쓸 경우 상태가 존재하면 해당 상태를 공유하게 되는데, 지금 같은 경우는 고유한 ThreadLocal 로서
+객체당 하나의 값을 가지므로, 두 쓰레드가 서로의 값에 접근하지 않는다.
+
+## Q&A
+
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0202/0202-4.png)
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0202/0202-5.png)
