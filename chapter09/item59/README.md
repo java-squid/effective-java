@@ -12,3 +12,8 @@
 조슈아는 **java.lang , java.util , java.io** 와 그 하위패키지들에는 익숙해 져야 된다고 한다. 나도 저 패키지들을 공부해보고, 여러 베스트 프렉티스들을 찾아보며 공부해보자 라는 
 생각이 들었다.
 
+## Q&A
+
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0202/0202-1.png)
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0202/0202-2.png)
+![Q](https://raw.githubusercontent.com/tmdgusya/imageStore/master/0202/0202-3.png)
